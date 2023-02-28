@@ -57,6 +57,8 @@
         <formatter-maven-plugin.version>2.21.0</formatter-maven-plugin.version>
         <directory-maven-plugin.version>1.0</directory-maven-plugin.version>
         <impsort-maven-plugin.version>1.8.0</impsort-maven-plugin.version>
+        <quarkus.version>2.16.3.Final</quarkus.version>
+        <quarkus.operator.sdk.version>5.1.0</quarkus.operator.sdk.version>
     </properties>
 
     <modules>
@@ -67,6 +69,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.quarkiverse.operatorsdk</groupId>
+                <artifactId>quarkus-operator-sdk-bom</artifactId>
+                <version>${quarkus.operator.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
