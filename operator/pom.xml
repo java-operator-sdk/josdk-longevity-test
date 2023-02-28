@@ -12,7 +12,7 @@
 
     <artifactId>operator</artifactId>
     <packaging>jar</packaging>
-    <name>operator</name>
+    <name>Operator</name>
     <description>Test Operator</description>
 
     <dependencies>

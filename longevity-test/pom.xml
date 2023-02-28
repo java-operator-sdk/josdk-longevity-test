@@ -12,7 +12,7 @@
 
     <artifactId>test</artifactId>
     <packaging>jar</packaging>
-    <name>test</name>
+    <name>Test</name>
     <description>Test To Run Periodically on Test Operator</description>
 
     <dependencies>
