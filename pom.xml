@@ -177,7 +177,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <property>longevitytest.project.root</property>
+                            <property>longevity.test.project.root</property>
                         </configuration>
                     </execution>
                 </executions>
