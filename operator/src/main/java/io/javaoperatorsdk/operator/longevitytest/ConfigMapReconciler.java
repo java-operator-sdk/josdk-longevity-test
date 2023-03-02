@@ -17,13 +17,17 @@ import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
-@ControllerConfiguration(labelSelector = "app=longevity-test")
+@ControllerConfiguration(labelSelector = ConfigMapReconciler.LABEL_SELECTOR,
+    namespaces = Constants.WATCH_CURRENT_NAMESPACE)
 public class ConfigMapReconciler
     implements Reconciler<ConfigMap>, EventSourceInitializer<ConfigMap> {
 
   private static final Logger log = LoggerFactory.getLogger(ConfigMapReconciler.class);
 
   private static final String DATA_KEY = "key";
+  public static final String LABEL_KEY = "app";
+  public static final String LABEL_VALUE = "longevity-test";
+  public static final String LABEL_SELECTOR = LABEL_KEY + "=" + LABEL_VALUE;
 
   @Inject
   private KubernetesClient client;
@@ -39,25 +43,26 @@ public class ConfigMapReconciler
       if (!match(secret, configMap)) {
         log.debug("Updating Secret, name:{}, namespace:{}", configMap.getMetadata().getName(),
             configMap.getMetadata().getName());
-        secret.setData(Map.of(DATA_KEY, configMap.getData().get(DATA_KEY)));
-        client.resource(secret).replace();
+        secret.setStringData(Map.of(DATA_KEY, configMap.getData().get(DATA_KEY)));
+        client.secrets().resource(secret).replace();
       }
     }, () -> {
       log.debug("Creating Secret, name:{}, namespace:{}", configMap.getMetadata().getName(),
           configMap.getMetadata().getName());
-      client.resource(desired(configMap)).create();
+      client.secrets().resource(desired(configMap)).create();
     });
     return UpdateControl.noUpdate();
   }
 
   private boolean match(Secret secret, ConfigMap configMap) {
-    return secret.getData().get(DATA_KEY).equals(configMap.getData().get(DATA_KEY));
+    return secret.getStringData().get(DATA_KEY).equals(configMap.getData().get(DATA_KEY));
   }
 
   @Override
   public Map<String, EventSource> prepareEventSources(EventSourceContext<ConfigMap> context) {
     InformerEventSource<Secret, ConfigMap> secretES =
         new InformerEventSource<>(InformerConfiguration.from(Secret.class, context)
+            .withLabelSelector(LABEL_SELECTOR)
             .build(), context);
     return EventSourceInitializer.nameEventSources(secretES);
   }
@@ -67,10 +72,11 @@ public class ConfigMapReconciler
         .withMetadata(new ObjectMetaBuilder()
             .withName(configMap.getMetadata().getName())
             .withNamespace(configMap.getMetadata().getNamespace())
-            .withLabels(Map.of("app", "longevity-test"))
+            .withLabels(Map.of(LABEL_KEY, LABEL_VALUE))
             .build())
-        .withData(Map.of(DATA_KEY, configMap.getData().get(DATA_KEY)))
+        // .withStringData()
         .build();
+    secret.setStringData(Map.of(DATA_KEY, configMap.getData().get(DATA_KEY)));
     secret.addOwnerReference(configMap);
     return secret;
   }
