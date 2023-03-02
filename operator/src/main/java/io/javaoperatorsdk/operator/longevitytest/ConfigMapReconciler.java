@@ -1,5 +1,6 @@
 package io.javaoperatorsdk.operator.longevitytest;
 
+import java.util.Base64;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -43,7 +44,7 @@ public class ConfigMapReconciler
       if (!match(secret, configMap)) {
         log.debug("Updating Secret, name:{}, namespace:{}", configMap.getMetadata().getName(),
             configMap.getMetadata().getName());
-        secret.setStringData(Map.of(DATA_KEY, configMap.getData().get(DATA_KEY)));
+        secret.setData(Map.of(DATA_KEY, encode(configMap.getData().get(DATA_KEY))));
         client.secrets().resource(secret).replace();
       }
     }, () -> {
@@ -55,7 +56,7 @@ public class ConfigMapReconciler
   }
 
   private boolean match(Secret secret, ConfigMap configMap) {
-    return secret.getStringData().get(DATA_KEY).equals(configMap.getData().get(DATA_KEY));
+    return decode(secret.getData().get(DATA_KEY)).equals(configMap.getData().get(DATA_KEY));
   }
 
   @Override
@@ -74,11 +75,18 @@ public class ConfigMapReconciler
             .withNamespace(configMap.getMetadata().getNamespace())
             .withLabels(Map.of(LABEL_KEY, LABEL_VALUE))
             .build())
-        // .withStringData()
+        .withData(Map.of(DATA_KEY, encode(configMap.getData().get(DATA_KEY))))
         .build();
-    secret.setStringData(Map.of(DATA_KEY, configMap.getData().get(DATA_KEY)));
     secret.addOwnerReference(configMap);
     return secret;
+  }
+
+  public static String decode(String value) {
+    return new String(Base64.getDecoder().decode(value.getBytes()));
+  }
+
+  private static String encode(String value) {
+    return Base64.getEncoder().encodeToString(value.getBytes());
   }
 
 }
