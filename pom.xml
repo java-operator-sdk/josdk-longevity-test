@@ -21,6 +21,11 @@
       <email>csviri@gmail.com</email>
     </developer>
   </developers>
+  <scm>
+    <connection>scm:git:git://github.com/java-operator-sdk/operator-longevity-test.git</connection>
+    <developerConnection>scm:git:git@github.com/java-operator-sdk/operator-longevity-test.git</developerConnection>
+    <url>https://github.com/java-operator-sdk/operator-longevity-test/tree/master</url>
+  </scm>
   <modules>
     <module>operator</module>
     <module>longevity-test</module>
